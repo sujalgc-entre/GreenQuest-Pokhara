@@ -12,16 +12,16 @@ export async function POST(req: Request) {
     const { messages, aqi } = await req.json();
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro",
+      model: "gemini-2.0-flash",
       systemInstruction: "You are an eco-friendly AI assistant for Pokhara, Nepal. Give detailed, actionable advice with local context. Use emojis occasionally. Be conversational and warm. Before your final answer, provide your reasoning process inside <thinking> tags. If the user asks for an eco-illustration or to 'show' something, provide a detailed image prompt at the end of your response inside <image_prompt> tags."
     });
 
-    const chat = model.startChat({
-      history: messages.slice(-5).map((m: any) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.text }],
-      })),
-    });
+    const history = messages.slice(0, -1).map((m: any) => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.text }],
+    }));
+
+    const chat = model.startChat({ history });
 
     const lastMessage = messages[messages.length - 1].text;
     const prompt = `Current Pokhara AQI: ${aqi}. User query: ${lastMessage}`;
