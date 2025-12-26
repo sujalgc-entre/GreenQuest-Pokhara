@@ -284,44 +284,49 @@ export default function ChatPage() {
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-      let fullText = '';
-      let thinking = '';
-      let imagePrompt = '';
-      let isThinking = false;
-      let isImagePrompt = false;
+      let accumulatedText = '';
 
       while (true) {
         const { done, value } = await reader!.read();
         if (done) break;
         
-        const chunk = decoder.decode(value);
+        accumulatedText += decoder.decode(value);
         
-        // Simple tag parsing from stream
-        let processedChunk = chunk;
-        if (processedChunk.includes('<thinking>') || processedChunk.includes('<think>')) {
-          isThinking = true;
-          processedChunk = processedChunk.replace('<thinking>', '').replace('<think>', '');
-        }
-        if (processedChunk.includes('</thinking>') || processedChunk.includes('</think>')) {
-          isThinking = false;
-          processedChunk = processedChunk.replace('</thinking>', '').replace('</think>', '');
-        }
-        if (processedChunk.includes('<image_prompt>')) {
-          isImagePrompt = true;
-          processedChunk = processedChunk.replace('<image_prompt>', '');
-        }
-        if (processedChunk.includes('</image_prompt>')) {
-          isImagePrompt = false;
-          processedChunk = processedChunk.replace('</image_prompt>', '');
+        let thinking = '';
+        let imagePrompt = '';
+        let displayText = accumulatedText;
+
+        // Extract thinking process
+        const thinkMatch = displayText.match(/<(?:think|thinking)>([\s\S]*?)<\/(?:think|thinking)>/i);
+        if (thinkMatch) {
+          thinking = thinkMatch[1];
+          displayText = displayText.replace(/<(?:think|thinking)>[\s\S]*?<\/(?:think|thinking)>/i, '');
+        } else {
+          const thinkStartMatch = displayText.match(/<(?:think|thinking)>/i);
+          if (thinkStartMatch) {
+            const startIdx = thinkStartMatch.index!;
+            const tagLength = thinkStartMatch[0].length;
+            thinking = displayText.substring(startIdx + tagLength);
+            displayText = displayText.substring(0, startIdx);
+          }
         }
 
-        if (isThinking) thinking += processedChunk;
-        else if (isImagePrompt) imagePrompt += processedChunk;
-        else fullText += processedChunk;
+        // Extract image prompt
+        const imageMatch = displayText.match(/<image_prompt>([\s\S]*?)<\/image_prompt>/i);
+        if (imageMatch) {
+          imagePrompt = imageMatch[1];
+          displayText = displayText.replace(/<image_prompt>[\s\S]*?<\/image_prompt>/i, '');
+        } else {
+          const imageStartIdx = displayText.indexOf('<image_prompt>');
+          if (imageStartIdx !== -1) {
+            imagePrompt = displayText.substring(imageStartIdx + 14);
+            displayText = displayText.substring(0, imageStartIdx);
+          }
+        }
 
         setMessages(prev => prev.map(m => 
           m.id === botMsgId 
-            ? { ...m, text: fullText, thinking, imagePrompt: imagePrompt.trim() } 
+            ? { ...m, text: displayText.trim(), thinking: thinking.trim(), imagePrompt: imagePrompt.trim() } 
             : m
         ));
       }

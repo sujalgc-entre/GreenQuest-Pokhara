@@ -12,10 +12,22 @@ export async function POST(req: Request) {
     const sdk = new Bytez(apiKey);
     const model = sdk.model("Qwen/Qwen3-0.6B");
 
-    const systemPrompt = "You are an eco-friendly AI assistant for Pokhara, Nepal. Give detailed, actionable advice with local context. Use emojis occasionally. Be conversational and warm. Before your final answer, provide your reasoning process inside <think> tags. If the user asks for an eco-illustration or to 'show' something, provide a detailed image prompt at the end of your response inside <image_prompt> tags.";
+    const systemPrompt = `You are an eco-friendly AI assistant for Pokhara, Nepal.
+IMPORTANT: You MUST follow this structure for every response:
+1. Start with your reasoning process wrapped in <think> tags.
+2. Then provide your final conversational answer to the user.
+3. If relevant, end with an image prompt wrapped in <image_prompt> tags.
+
+Example:
+<think>
+The user is asking about AQI in Pokhara. I should explain the current level and give tips.
+</think>
+Namaste! The air quality today is...
+
+Be conversational, warm, and use local context.`;
     
     const formattedMessages = [
-      { role: "user", content: systemPrompt },
+      { role: "system", content: systemPrompt },
       ...messages.map((m: any) => ({
         role: m.role === 'user' ? 'user' : 'assistant',
         content: m.text || m.content
