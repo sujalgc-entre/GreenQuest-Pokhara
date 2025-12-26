@@ -72,9 +72,15 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground overflow-x-hidden text-base font-normal;
     background: radial-gradient(circle at 50% 0%, #0f766e 0%, #14b8a6 50%, #0f172a 100%);
     background-attachment: fixed;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+    font-weight: 600 !important;
   }
 }
 
@@ -84,7 +90,15 @@
   }
   
   .glass-dark {
-    @apply backdrop-blur-xl bg-black/20 border border-white/10 shadow-2xl;
+    @apply backdrop-blur-xl bg-black/40 border border-white/10 shadow-2xl;
+  }
+
+  .solid-card {
+    @apply bg-zinc-900 border border-zinc-800 shadow-xl rounded-3xl p-6;
+  }
+
+  .text-shadow-heavy {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
   }
 
   .neumorph {
