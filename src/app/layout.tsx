@@ -6,6 +6,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { BottomNav } from "@/components/BottomNav";
 import { Toaster } from "sonner";
 import { PageWrapper } from "@/components/Animations";
+import { SwipeNavigator } from "@/components/SwipeNavigator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,11 +34,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground pb-24`}
       >
         <div className="mesh-gradient" />
-        <AuthProvider>
-          <PageWrapper>
-            {children}
-          </PageWrapper>
-          <BottomNav />
+          <AuthProvider>
+            <SwipeNavigator>
+              <PageWrapper>
+                {children}
+              </PageWrapper>
+            </SwipeNavigator>
+            <BottomNav />
+
           <Toaster position="top-center" richColors />
         </AuthProvider>
         <VisualEditsMessenger />

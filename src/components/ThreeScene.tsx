@@ -84,7 +84,38 @@ function Particles({ count = 100 }) {
   );
 }
 
-export function ThreeScene() {
+function GrowingTree({ growth = 0 }) {
+  const group = useRef<THREE.Group>(null);
+  const targetScale = 0.5 + Math.min(growth / 100, 2); // Grow up to 2.5x
+  
+  useFrame((state) => {
+    if (group.current) {
+      group.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.05);
+      group.current.rotation.y += 0.01;
+    }
+  });
+
+  return (
+    <group ref={group} position={[2, -1, 0]}>
+      {/* Trunk */}
+      <mesh position={[0, 0.5, 0]}>
+        <cylinderGeometry args={[0.1, 0.15, 1, 8]} />
+        <meshStandardMaterial color="#3f2a14" />
+      </mesh>
+      {/* Leaves */}
+      <mesh position={[0, 1.2, 0]}>
+        <coneGeometry args={[0.6, 1.2, 8]} />
+        <meshStandardMaterial color="#10b981" />
+      </mesh>
+      <mesh position={[0, 1.7, 0]}>
+        <coneGeometry args={[0.4, 0.8, 8]} />
+        <meshStandardMaterial color="#059669" />
+      </mesh>
+    </group>
+  );
+}
+
+export function ThreeScene({ userImpact = 0 }: { userImpact?: number }) {
   return (
     <div className="absolute inset-0 -z-10 h-full w-full pointer-events-none">
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
@@ -93,6 +124,7 @@ export function ThreeScene() {
         <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         <Earth />
+        <GrowingTree growth={userImpact} />
         <Particles count={50} />
         <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
       </Canvas>

@@ -11,28 +11,36 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [aqi, setAqi] = useState<any>(null);
-  const [userData, setUserData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 500], [0, 200]);
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+    const [weather, setWeather] = useState<any>(null);
+    const [aqi, setAqi] = useState<any>(null);
+    const [userData, setUserData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
+    const { scrollY } = useScroll();
+    const heroY = useTransform(scrollY, [0, 500], [0, 200]);
+    const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+    const refreshIndicatorY = useTransform(scrollY, [-100, 0], [50, -50]);
+    const refreshIndicatorOpacity = useTransform(scrollY, [-100, -50], [1, 0]);
+    const refreshIndicatorRotate = useTransform(scrollY, [-100, 0], [360, 0]);
 
-  useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       if (!user) return;
-
+      setLoading(true);
       try {
-        const aqiRes = await fetch('https://api.waqi.info/feed/pokhara/?token=demo');
-        if (!aqiRes.ok) throw new Error('Failed to fetch AQI');
-        const aqiData = await aqiRes.json();
-        
-        if (aqiData.status === 'ok') {
-          setAqi(aqiData.data);
-        } else {
-          setAqi({ aqi: 42, iaqi: { t: { v: 22 } } }); // Mock data if API limit reached
+        const [aqiRes, weatherRes] = await Promise.all([
+          fetch('https://api.waqi.info/feed/pokhara/?token=demo'),
+          fetch('/api/weather')
+        ]);
+
+        if (aqiRes.ok) {
+          const aqiData = await aqiRes.json();
+          if (aqiData.status === 'ok') setAqi(aqiData.data);
+        }
+
+        if (weatherRes.ok) {
+          const weatherData = await weatherRes.json();
+          setWeather(weatherData);
         }
 
         const { data: profile } = await supabase
@@ -44,16 +52,17 @@ export default function Dashboard() {
       } catch (err: any) {
         console.error('Error fetching dashboard data:', err);
         setError(err.message);
-        // Fallback mock data
         setAqi({ aqi: 42, iaqi: { t: { v: 22 } } });
       } finally {
         setLoading(false);
       }
-    }
+    };
+  
+    useEffect(() => {
+      fetchData();
+      
+      const subscription = supabase
 
-    fetchData();
-    
-    const subscription = supabase
       .channel('profile_updates')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user?.id}` }, 
         (payload) => setUserData(payload.new)
@@ -74,9 +83,12 @@ export default function Dashboard() {
 
   const aqiValue = aqi?.aqi || 42;
   const aqiInfo = getAqiStatus(aqiValue);
-  const temperature = aqi?.iaqi?.t?.v || 22;
+    const temperature = weather?.main?.temp || aqi?.iaqi?.t?.v || 22;
+    const weatherMain = weather?.weather?.[0]?.main || 'Cloudy';
+    const windSpeed = weather?.wind?.speed ? `${(weather.wind.speed * 3.6).toFixed(1)} km/h` : '12 km/h';
 
-  if (loading) return (
+    if (loading) return (
+
     <div className="flex h-screen items-center justify-center bg-background">
       <motion.div
         animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
@@ -87,9 +99,22 @@ export default function Dashboard() {
     </div>
   );
 
-  return (
-    <div className="relative flex flex-col min-h-screen">
-      <ThreeScene />
+    return (
+      <div className="relative flex flex-col min-h-screen">
+        <ThreeScene userImpact={userData?.total_co2_saved || 0} />
+
+        <motion.div
+          style={{ y: refreshIndicatorY, opacity: refreshIndicatorOpacity, rotate: refreshIndicatorRotate }}
+          className="fixed top-0 left-1/2 -translate-x-1/2 z-50 p-3 glass rounded-full shadow-2xl"
+          onViewportLeave={() => {
+            if (scrollY.get() < -80) {
+              fetchData();
+            }
+          }}
+        >
+          <Leaf className="w-6 h-6 text-teal-400" />
+        </motion.div>
+
 
       <main className="flex-1 px-6 pt-12 pb-32 max-w-2xl mx-auto w-full space-y-8">
         <header className="flex justify-between items-start">
@@ -158,17 +183,18 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="glass bg-white/5 p-4 rounded-2xl flex items-center gap-3">
                 <CloudSun className="w-5 h-5 text-teal-300" />
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-white/40">Weather</p>
-                  <p className="text-sm font-bold text-white">Cloudy</p>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-white/40">Weather</p>
+                    <p className="text-sm font-bold text-white">{weatherMain}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="glass bg-white/5 p-4 rounded-2xl flex items-center gap-3">
-                <Wind className="w-5 h-5 text-teal-300" />
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-white/40">Wind</p>
-                  <p className="text-sm font-bold text-white">12 km/h</p>
-                </div>
+                <div className="glass bg-white/5 p-4 rounded-2xl flex items-center gap-3">
+                  <Wind className="w-5 h-5 text-teal-300" />
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-white/40">Wind</p>
+                    <p className="text-sm font-bold text-white">{windSpeed}</p>
+                  </div>
+
               </div>
             </div>
           </div>

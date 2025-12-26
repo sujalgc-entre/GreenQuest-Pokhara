@@ -5,15 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Trophy, Medal, MapPin, Target, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard, Counter } from '@/components/Animations';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+import { ThreeBarChart } from '@/components/ThreeBarChart';
 
 export default function LeaderboardPage() {
   const [data, setData] = useState<any[]>([]);
@@ -178,45 +170,10 @@ export default function LeaderboardPage() {
       <GlassCard className="border-teal-500/10 overflow-hidden">
         <h2 className="text-sm font-bold uppercase tracking-widest text-teal-400/80 mb-8 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
-          Ward Visualization
+          3D Ward Impact
         </h2>
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout="vertical">
-              <XAxis type="number" hide />
-              <YAxis 
-                dataKey="ward" 
-                type="category" 
-                width={80} 
-                tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }} 
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip 
-                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="glass p-3 border-teal-500/30 rounded-xl shadow-2xl">
-                        <p className="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-1">Impact Result</p>
-                        <p className="text-lg font-black text-white">{payload[0].value.toFixed(2)}kg <span className="text-xs font-medium opacity-60">CO2</span></p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar dataKey="total" radius={[0, 12, 12, 0]} barSize={20}>
-                {chartData.map((_entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={index === 0 ? '#14b8a6' : 'rgba(20, 184, 166, 0.2)'}
-                    stroke={index === 0 ? 'rgba(255,255,255,0.2)' : 'transparent'}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="h-80 w-full glass bg-black/20 rounded-3xl overflow-hidden">
+          <ThreeBarChart data={chartData} />
         </div>
       </GlassCard>
     </div>
