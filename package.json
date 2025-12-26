@@ -41,6 +41,7 @@
     "@react-three/fiber": "^9.4.2",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/supabase-js": "^2.89.0",
+    "bytez.js": "^3.0.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
