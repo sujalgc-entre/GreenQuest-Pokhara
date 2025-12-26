@@ -1,65 +1,139 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/AuthProvider';
+import { Wind, CloudSun, Thermometer, User, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export default function Dashboard() {
+  const { user } = useAuth();
+  const [aqi, setAqi] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) return;
+
+      try {
+        // Fetch AQI
+        const aqiRes = await fetch('https://api.waqi.info/feed/pokhara/?token=demo');
+        const aqiData = await aqiRes.json();
+        setAqi(aqiData.data);
+
+        // Fetch User Profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setUserData(profile);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+    
+    // Subscribe to profile changes for real-time CO2 updates
+    const subscription = supabase
+      .channel('profile_updates')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user?.id}` }, 
+        (payload) => setUserData(payload.new)
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user]);
+
+  const getAqiColor = (val: number) => {
+    if (val < 50) return 'bg-green-500';
+    if (val < 100) return 'bg-yellow-500';
+    if (val < 150) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+
+  const getAqiStatus = (val: number) => {
+    if (val < 50) return 'Good';
+    if (val < 100) return 'Moderate';
+    if (val < 150) return 'Unhealthy for Sensitive Groups';
+    return 'Unhealthy';
+  };
+
+  if (loading) return <div className="flex h-screen items-center justify-center">Loading Pokhara vibes...</div>;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col p-4 max-w-md mx-auto space-y-6">
+      <header className="flex justify-between items-center pt-6">
+        <div>
+          <h1 className="text-xl font-bold text-zinc-900">Hello, {userData?.username || 'Eco-Warrior'}</h1>
+          <p className="text-sm text-zinc-500">{userData?.ward}</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => supabase.auth.signOut()}
+          className="text-zinc-400 hover:text-red-500"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
+      </header>
+
+      {/* AQI Card */}
+      <div className={`relative overflow-hidden rounded-3xl p-6 text-white shadow-lg ${getAqiColor(aqi?.aqi)}`}>
+        <div className="flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-sm font-medium opacity-90">Pokhara Air Quality</p>
+            <h2 className="text-4xl font-bold">{aqi?.aqi}</h2>
+            <p className="text-lg font-semibold">{getAqiStatus(aqi?.aqi)}</p>
+          </div>
+          <Wind className="w-12 h-12 opacity-30" />
         </div>
-      </main>
+        <div className="mt-4 flex gap-4 text-sm font-medium opacity-90">
+          <div className="flex items-center gap-1">
+            <Thermometer className="w-4 h-4" />
+            <span>{aqi?.iaqi?.t?.v}°C</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <CloudSun className="w-4 h-4" />
+            <span>Weather Icon</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Impact Card */}
+      <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm space-y-4">
+        <div className="flex items-center gap-3 text-green-600">
+          <div className="p-2 bg-green-50 rounded-lg">
+            <User className="w-5 h-5" />
+          </div>
+          <span className="font-bold">Personal Impact</span>
+        </div>
+        <div className="grid grid-cols-1 gap-2">
+          <div className="flex flex-col items-center justify-center p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+            <span className="text-sm text-zinc-500 uppercase tracking-wider font-semibold">Total CO2 Saved</span>
+            <span className="text-4xl font-black text-zinc-900 mt-1">
+              {userData?.total_co2_saved?.toFixed(2) || '0.00'}
+              <span className="text-lg font-normal text-zinc-400 ml-1">kg</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Encouragement */}
+      <div className="bg-green-600 rounded-2xl p-4 text-white flex items-center gap-4">
+        <div className="bg-white/20 p-2 rounded-full">
+          <LogOut className="w-6 h-6 rotate-180" />
+        </div>
+        <p className="text-sm font-medium">
+          You've saved as much CO2 as {((userData?.total_co2_saved || 0) / 0.5).toFixed(1)} smartphone charges!
+        </p>
+      </div>
     </div>
   );
 }
