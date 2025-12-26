@@ -23,8 +23,8 @@ export async function POST(req: Request) {
     const text = response.text();
 
     return NextResponse.json({ tip: text });
-  } catch (error: any) {
-    console.error("Gemini API Error:", error);
+    } catch (error: unknown) {
+      console.error("Gemini API Error:", error instanceof Error ? error.message : error);
     // Fallback tip if API fails
     return NextResponse.json({ 
       tip: "Small actions lead to big changes. Consider reducing plastic waste today for a cleaner Pokhara." 

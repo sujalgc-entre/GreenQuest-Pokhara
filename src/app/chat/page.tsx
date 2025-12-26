@@ -3,10 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Send, Bot, User, Leaf } from 'lucide-react';
+import { Sparkles, Send, Bot, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GlassCard } from '@/components/Animations';
 
 function Typewriter({ text, speed = 30 }: { text: string; speed?: number }) {
   const [displayedText, setDisplayedText] = useState('');
@@ -14,7 +13,7 @@ function Typewriter({ text, speed = 30 }: { text: string; speed?: number }) {
   useEffect(() => {
     let i = 0;
     const timer = setInterval(() => {
-      setDisplayedText((prev) => text.substring(0, i + 1));
+      setDisplayedText(text.substring(0, i + 1));
       i++;
       if (i >= text.length) clearInterval(timer);
     }, speed);

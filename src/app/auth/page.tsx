@@ -52,9 +52,9 @@ export default function AuthPage() {
         toast.success('Check your email for verification!');
         setIsLogin(true);
       }
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
+      } catch (error: unknown) {
+        toast.error(error instanceof Error ? error.message : 'Authentication failed');
+      } finally {
       setLoading(false);
     }
   };
@@ -186,11 +186,11 @@ export default function AuthPage() {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
             >
-              {isLogin ? (
-                <span>Don't have an account? <span className="font-bold underline">Join the quest</span></span>
-              ) : (
-                <span>Already a member? <span className="font-bold underline">Login here</span></span>
-              )}
+                {isLogin ? (
+                  <span>Don&apos;t have an account? <span className="font-bold underline">Join the quest</span></span>
+                ) : (
+                  <span>Already a member? <span className="font-bold underline">Login here</span></span>
+                )}
             </button>
           </div>
         </div>
