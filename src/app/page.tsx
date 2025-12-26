@@ -118,134 +118,136 @@ export default function Dashboard() {
 
       <main className="flex-1 px-6 pt-12 pb-32 max-w-2xl mx-auto w-full space-y-8">
         <header className="flex justify-between items-start">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            style={{ y: heroY, opacity: heroOpacity }}
-          >
-            <h1 className="text-3xl font-black text-white tracking-tight text-glow">
-              Quest <span className="text-teal-400">Update</span>
-            </h1>
-            <p className="text-teal-100/60 font-medium">Hello, {userData?.username || 'Warrior'}</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => supabase.auth.signOut()}
-              className="glass-dark rounded-full text-zinc-400 hover:text-red-400 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
-          </motion.div>
-        </header>
-
-        {error && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex items-center gap-3 text-orange-200 text-sm"
-          >
-            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-            <span>Real-time AQI unavailable. Showing estimated data for Pokhara.</span>
-          </motion.div>
-        )}
-
-        <GlassCard className="relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Wind className="w-32 h-32 text-white" />
-          </div>
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-bold uppercase tracking-widest text-teal-400/80">Air Quality Pokhara</span>
-              <div className="flex items-center gap-2 glass px-3 py-1 rounded-full text-xs font-bold text-white">
-                <div className={`w-2 h-2 rounded-full animate-pulse bg-teal-400`} />
-                LIVE
-              </div>
-            </div>
-            
-            <div className="flex items-end gap-4">
-              <h2 className="text-7xl font-black text-white tracking-tighter">
-                <Counter value={aqiValue} decimals={0} />
-              </h2>
-              <div className="pb-2">
-                <p className={`text-xl font-bold ${aqiInfo.color} drop-shadow-md`}>{aqiInfo.label}</p>
-                <div className="flex items-center gap-2 text-white/60 text-sm font-medium">
-                  <Thermometer className="w-4 h-4" />
-                  <span>{temperature}°C</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="glass bg-white/5 p-4 rounded-2xl flex items-center gap-3">
-                <CloudSun className="w-5 h-5 text-teal-300" />
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-white/40">Weather</p>
-                    <p className="text-sm font-bold text-white">{weatherMain}</p>
-                  </div>
-                </div>
-                <div className="glass bg-white/5 p-4 rounded-2xl flex items-center gap-3">
-                  <Wind className="w-5 h-5 text-teal-300" />
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-white/40">Wind</p>
-                    <p className="text-sm font-bold text-white">{windSpeed}</p>
-                  </div>
-
-              </div>
-            </div>
-          </div>
-        </GlassCard>
-
-        <GlassCard className="border-teal-500/20">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-teal-500/20 rounded-xl">
-                <Leaf className="w-6 h-6 text-teal-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Carbon Savings</h3>
-                <p className="text-xs text-white/40">Personal Impact</p>
-              </div>
-            </div>
-            <ArrowUpRight className="w-6 h-6 text-teal-500/50" />
-          </div>
-
-          <div className="relative py-8 flex flex-col items-center justify-center">
             <motion.div 
-              className="absolute inset-0 bg-teal-500/10 blur-3xl rounded-full"
-              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-              transition={{ duration: 4, repeat: Infinity }}
-            />
-            <span className="text-6xl font-black text-white tracking-tighter relative">
-              <Counter value={userData?.total_co2_saved || 0} />
-              <span className="text-2xl font-medium text-teal-500/60 ml-2">kg</span>
-            </span>
-            <p className="mt-4 text-sm font-medium text-white/60 text-center max-w-[200px]">
-              You've offset as much CO2 as <span className="text-teal-400 font-bold">{((userData?.total_co2_saved || 0) / 0.5).toFixed(1)}</span> smartphone charges!
-            </p>
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ y: heroY, opacity: heroOpacity }}
+            >
+              <h1 className="text-4xl font-black text-white tracking-tight text-glow">
+                Quest <span className="text-teal-400">Update</span>
+              </h1>
+              <p className="text-teal-100 font-semibold text-lg">Hello, {userData?.username || 'Warrior'}</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => supabase.auth.signOut()}
+                className="glass-dark rounded-full text-white hover:text-red-400 transition-colors h-12 w-12"
+                aria-label="Log Out"
+              >
+                <LogOut className="w-6 h-6" />
+              </Button>
+            </motion.div>
+          </header>
+
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="bg-orange-500/20 border border-orange-500/40 rounded-2xl p-4 flex items-center gap-3 text-orange-100 text-base"
+            >
+              <AlertTriangle className="w-6 h-6 flex-shrink-0" />
+              <span>Real-time AQI unavailable. Showing estimated data for Pokhara.</span>
+            </motion.div>
+          )}
+
+          <div className="solid-card relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Wind className="w-32 h-32 text-white" />
+            </div>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <span className="text-base font-bold uppercase tracking-widest text-teal-300">Air Quality Pokhara</span>
+                <div className="flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-bold text-white">
+                  <div className={`w-3 h-3 rounded-full animate-pulse bg-teal-400`} />
+                  LIVE
+                </div>
+              </div>
+              
+              <div className="flex items-end gap-4">
+                <h2 className="text-8xl font-black text-white tracking-tighter">
+                  <Counter value={aqiValue} decimals={0} />
+                </h2>
+                <div className="pb-2">
+                  <p className={`text-2xl font-black ${aqiInfo.color} drop-shadow-md`}>{aqiInfo.label}</p>
+                  <div className="flex items-center gap-2 text-white/80 text-base font-bold">
+                    <Thermometer className="w-5 h-5" />
+                    <span>{temperature}°C</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="glass bg-white/10 p-5 rounded-2xl flex items-center gap-3">
+                  <CloudSun className="w-6 h-6 text-teal-300" />
+                    <div>
+                      <p className="text-xs uppercase font-black text-teal-200">Weather</p>
+                      <p className="text-base font-bold text-white">{weatherMain}</p>
+                    </div>
+                  </div>
+                  <div className="glass bg-white/10 p-5 rounded-2xl flex items-center gap-3">
+                    <Wind className="w-6 h-6 text-teal-300" />
+                    <div>
+                      <p className="text-xs uppercase font-black text-teal-200">Wind</p>
+                      <p className="text-base font-bold text-white">{windSpeed}</p>
+                    </div>
+
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-8">
-            <div className="flex justify-between text-xs font-bold text-teal-400/80 mb-2 uppercase tracking-wider">
-              <span>Ward {userData?.ward} Progress</span>
-              <span>72%</span>
+          <div className="solid-card border-teal-500/40">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-teal-500/30 rounded-2xl">
+                  <Leaf className="w-8 h-8 text-teal-300" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white">Carbon Savings</h3>
+                  <p className="text-sm font-bold text-teal-200/60">Personal Impact</p>
+                </div>
+              </div>
+              <ArrowUpRight className="w-8 h-8 text-teal-500/50" />
             </div>
-            <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+
+            <div className="relative py-10 flex flex-col items-center justify-center">
               <motion.div 
-                initial={{ width: 0 }}
-                whileInView={{ width: '72%' }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-teal-600 to-teal-400 relative"
-              >
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:20px_20px] animate-[shimmer_2s_linear_infinite]" />
-              </motion.div>
+                className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full"
+                animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
+              <span className="text-7xl font-black text-white tracking-tighter relative">
+                <Counter value={userData?.total_co2_saved || 0} />
+                <span className="text-3xl font-bold text-teal-400 ml-2">kg</span>
+              </span>
+              <p className="mt-6 text-base font-bold text-white/90 text-center max-w-[250px] leading-relaxed">
+                You&apos;ve offset as much CO2 as <span className="text-teal-400 font-black">{((userData?.total_co2_saved || 0) / 0.5).toFixed(1)}</span> smartphone charges!
+              </p>
+            </div>
+
+            <div className="mt-10">
+              <div className="flex justify-between text-sm font-black text-teal-300 mb-3 uppercase tracking-widest">
+                <span>Ward {userData?.ward} Progress</span>
+                <span>72%</span>
+              </div>
+              <div className="h-4 w-full bg-white/10 rounded-full overflow-hidden border border-white/10 p-0.5">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  whileInView={{ width: '72%' }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full relative"
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.3)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.3)_50%,rgba(255,255,255,0.3)_75%,transparent_75%,transparent)] bg-[length:20px_20px] animate-[shimmer_2s_linear_infinite]" />
+                </motion.div>
+              </div>
             </div>
           </div>
-        </GlassCard>
+
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

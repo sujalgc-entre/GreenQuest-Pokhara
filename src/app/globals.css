@@ -73,32 +73,43 @@
   }
   body {
     @apply bg-background text-foreground overflow-x-hidden text-base font-normal;
-    background: radial-gradient(circle at 50% 0%, #0f766e 0%, #14b8a6 50%, #0f172a 100%);
+    background: radial-gradient(circle at 50% 0%, #0f766e 0%, #0d9488 50%, #020617 100%);
     background-attachment: fixed;
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.6;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold;
+    @apply font-semibold tracking-tight;
     font-weight: 600 !important;
+  }
+  p, span, div, label, input, button {
+    font-size: 16px;
   }
 }
 
 @layer components {
   .glass {
-    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-xl;
+    @apply backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl;
   }
   
   .glass-dark {
-    @apply backdrop-blur-xl bg-black/40 border border-white/10 shadow-2xl;
+    @apply backdrop-blur-xl bg-black/60 border border-white/20 shadow-2xl;
   }
 
   .solid-card {
-    @apply bg-zinc-900 border border-zinc-800 shadow-xl rounded-3xl p-6;
+    @apply bg-slate-900 border border-slate-800 shadow-xl rounded-3xl p-6;
   }
 
   .text-shadow-heavy {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+  }
+
+  .helper-text {
+    @apply text-sm text-teal-200/80 mt-1 block;
+  }
+
+  .accessible-label {
+    @apply text-base font-bold uppercase tracking-widest text-teal-300 mb-2 block;
   }
 
   .neumorph {

@@ -105,91 +105,94 @@ export default function LogActionPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {ACTIONS.map((action, index) => (
-          <motion.button
-            key={action.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedAction(action.id)}
-            className={`relative flex flex-col items-center justify-center p-4 rounded-3xl transition-all duration-300 ${
-              selectedAction === action.id
-                ? 'glass bg-teal-500/20 border-teal-500/50 shadow-[0_0_20px_rgba(20,184,166,0.3)]'
-                : 'glass-dark hover:bg-white/5 border-white/10'
-            }`}
-          >
-            <action.icon className={`w-8 h-8 mb-2 ${selectedAction === action.id ? 'text-teal-400' : 'text-zinc-500'}`} />
-            <span className={`text-[10px] font-black uppercase tracking-wider text-center ${selectedAction === action.id ? 'text-white' : 'text-zinc-500'}`}>
-              {action.label}
-            </span>
-            {selectedAction === action.id && (
-              <motion.div
-                layoutId="selected-indicator"
-                className="absolute -top-1 -right-1"
-              >
-                <CheckCircle2 className="w-5 h-5 text-teal-400 fill-background" />
-              </motion.div>
-            )}
-          </motion.button>
-        ))}
-      </div>
-
-      <GlassCard className="border-teal-500/20">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-3">
-            <Label htmlFor="quantity" className="text-sm font-bold uppercase tracking-widest text-teal-400/80">
-              Quantity ({ACTIONS.find(a => a.id === selectedAction)?.unit})
-            </Label>
-            <div className="relative group">
-              <Input
-                id="quantity"
-                type="number"
-                step="0.1"
-                placeholder="Enter amount..."
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                required
-                className="h-16 bg-white/5 border-white/10 rounded-2xl text-xl font-bold text-white placeholder:text-white/20 focus:ring-2 focus:ring-teal-500/50 transition-all"
-              />
-              <div className="absolute inset-0 bg-teal-500/5 blur-xl rounded-2xl -z-10 group-focus-within:bg-teal-500/10 transition-all" />
-            </div>
-            {parseFloat(quantity) > MAX_QUANTITY && (
-              <motion.p 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-red-400 text-xs flex items-center gap-1"
-              >
-                <AlertCircle className="w-3 h-3" /> That's a bit too much for one quest!
-              </motion.p>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full h-16 bg-gradient-to-br from-teal-500 to-teal-700 hover:from-teal-400 hover:to-teal-600 text-white text-lg font-black rounded-2xl shadow-[0_10px_30px_rgba(20,184,166,0.3)] transition-all hover:scale-[1.02] active:scale-0.95 disabled:opacity-50"
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
+            <motion.button
+              key={action.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedAction(action.id)}
+              className={`relative flex flex-col items-center justify-center p-6 rounded-3xl transition-all duration-300 min-h-[100px] min-w-[100px] ${
+                selectedAction === action.id
+                  ? 'bg-teal-500 shadow-[0_0_30px_rgba(20,184,166,0.4)] border-teal-400'
+                  : 'solid-card bg-slate-800 border-white/10'
+              }`}
+            >
+              <action.icon className={`w-10 h-10 mb-3 ${selectedAction === action.id ? 'text-white' : 'text-teal-400'}`} />
+              <span className={`text-sm font-black uppercase tracking-wider text-center ${selectedAction === action.id ? 'text-white' : 'text-slate-300'}`}>
+                {action.label}
+              </span>
+              {selectedAction === action.id && (
                 <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  layoutId="selected-indicator"
+                  className="absolute -top-2 -right-2"
                 >
-                  <Leaf className="w-5 h-5" />
+                  <CheckCircle2 className="w-8 h-8 text-white fill-teal-600" />
                 </motion.div>
-                Processing...
-              </div>
-            ) : (
-              'Complete Quest'
-            )}
-          </Button>
+              )}
+            </motion.button>
+          ))}
+        </div>
 
-          <p className="text-center text-xs font-medium text-white/40 italic">
-            Your contribution will be added to Ward {userWard}'s total impact
-          </p>
-        </form>
-      </GlassCard>
+        <div className="solid-card border-teal-500/30">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-4">
+              <Label htmlFor="quantity" className="accessible-label">
+                Quantity ({ACTIONS.find(a => a.id === selectedAction)?.unit})
+              </Label>
+              <div className="relative group">
+                <Input
+                  id="quantity"
+                  type="number"
+                  step="0.1"
+                  placeholder="Enter amount..."
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                  className="h-20 bg-black/40 border-white/20 rounded-2xl text-2xl font-black text-white placeholder:text-white/20 focus:ring-4 focus:ring-teal-500/40 transition-all text-center"
+                />
+              </div>
+              <p className="helper-text italic text-center">
+                This will save approx. <span className="text-teal-400 font-black">{(ACTIONS.find(a => a.id === selectedAction)?.co2 || 0) * (parseFloat(quantity) || 0)}kg</span> of CO2 emissions.
+              </p>
+              {parseFloat(quantity) > MAX_QUANTITY && (
+                <motion.p 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-400 text-sm font-bold flex items-center justify-center gap-2 bg-red-500/10 p-3 rounded-xl border border-red-500/20"
+                >
+                  <AlertCircle className="w-5 h-5" /> That&apos;s a bit too much for one quest!
+                </motion.p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-20 bg-gradient-to-br from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xl font-black rounded-2xl shadow-[0_15px_40px_rgba(20,184,166,0.4)] transition-all hover:scale-[1.02] active:scale-0.95 disabled:opacity-50 border-0"
+            >
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Leaf className="w-6 h-6" />
+                  </motion.div>
+                  Processing...
+                </div>
+              ) : (
+                'Log This Quest'
+              )}
+            </Button>
+
+            <p className="text-center text-sm font-bold text-teal-200/40 uppercase tracking-widest">
+              Adding impact to Ward {userWard}
+            </p>
+          </form>
+        </div>
+
 
       <div className="flex justify-center">
         <div className="glass px-6 py-3 rounded-full flex items-center gap-3 border-teal-500/20">
