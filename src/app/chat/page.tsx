@@ -298,13 +298,13 @@ export default function ChatPage() {
         
         // Simple tag parsing from stream
         let processedChunk = chunk;
-        if (processedChunk.includes('<thinking>')) {
+        if (processedChunk.includes('<thinking>') || processedChunk.includes('<think>')) {
           isThinking = true;
-          processedChunk = processedChunk.replace('<thinking>', '');
+          processedChunk = processedChunk.replace('<thinking>', '').replace('<think>', '');
         }
-        if (processedChunk.includes('</thinking>')) {
+        if (processedChunk.includes('</thinking>') || processedChunk.includes('</think>')) {
           isThinking = false;
-          processedChunk = processedChunk.replace('</thinking>', '');
+          processedChunk = processedChunk.replace('</thinking>', '').replace('</think>', '');
         }
         if (processedChunk.includes('<image_prompt>')) {
           isImagePrompt = true;

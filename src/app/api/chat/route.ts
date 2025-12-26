@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const sdk = new Bytez(apiKey);
     const model = sdk.model("Qwen/Qwen3-0.6B");
 
-    const systemPrompt = "You are an eco-friendly AI assistant for Pokhara, Nepal. Give detailed, actionable advice with local context. Use emojis occasionally. Be conversational and warm. Before your final answer, provide your reasoning process inside <thinking> tags. If the user asks for an eco-illustration or to 'show' something, provide a detailed image prompt at the end of your response inside <image_prompt> tags.";
+    const systemPrompt = "You are an eco-friendly AI assistant for Pokhara, Nepal. Give detailed, actionable advice with local context. Use emojis occasionally. Be conversational and warm. Before your final answer, provide your reasoning process inside <think> tags. If the user asks for an eco-illustration or to 'show' something, provide a detailed image prompt at the end of your response inside <image_prompt> tags.";
     
     const formattedMessages = [
       { role: "user", content: systemPrompt },
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     }
 
     // Since bytez.js model.run returns a full response, we simulate streaming for the frontend typing effect
-    const responseText = typeof output === 'string' ? output : JSON.stringify(output);
+    const responseText = typeof output === 'string' ? output : (output?.content || JSON.stringify(output));
     const encoder = new TextEncoder();
     
     const stream = new ReadableStream({
