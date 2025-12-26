@@ -4,30 +4,47 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    
     if (!apiKey) {
-      return NextResponse.json({ 
-        tip: "Keep Pokhara green! Try biking or walking today to reduce your carbon footprint." 
-      });
+      return NextResponse.json({ error: "API Key not configured" }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const { aqi } = await req.json();
+    const { messages, aqi } = await req.json();
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const prompt = `Pokhara AQI is ${aqi}. Give one actionable eco-tip for today in 2 sentences. Be encouraging and specific to Pokhara's environment.`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    return NextResponse.json({ tip: text });
-    } catch (error: unknown) {
-      console.error("Gemini API Error:", error instanceof Error ? error.message : error);
-    // Fallback tip if API fails
-    return NextResponse.json({ 
-      tip: "Small actions lead to big changes. Consider reducing plastic waste today for a cleaner Pokhara." 
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-pro",
+      systemInstruction: "You are an eco-friendly AI assistant for Pokhara, Nepal. Give detailed, actionable advice with local context. Use emojis occasionally. Be conversational and warm. Before your final answer, provide your reasoning process inside <thinking> tags. If the user asks for an eco-illustration or to 'show' something, provide a detailed image prompt at the end of your response inside <image_prompt> tags."
     });
+
+    const chat = model.startChat({
+      history: messages.slice(-5).map((m: any) => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }],
+      })),
+    });
+
+    const lastMessage = messages[messages.length - 1].text;
+    const prompt = `Current Pokhara AQI: ${aqi}. User query: ${lastMessage}`;
+
+    const result = await chat.sendMessageStream(prompt);
+    
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of result.stream) {
+          const chunkText = chunk.text();
+          controller.enqueue(encoder.encode(chunkText));
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+
+  } catch (error: any) {
+    console.error("Gemini API Error:", error);
+    return NextResponse.json({ error: "Failed to connect to AI" }, { status: 500 });
   }
 }
