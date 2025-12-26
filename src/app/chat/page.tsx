@@ -244,6 +244,41 @@ export default function ChatPage() {
     }
   };
 
+  const generateVisual = async () => {
+    if (!input.trim() && messages.length === 0) {
+      toast.error('Type something first to generate a visual!');
+      return;
+    }
+
+    const textToProcess = input.trim() || messages[messages.length - 1]?.text || '';
+    if (!textToProcess) return;
+
+    setLoading(true);
+    // Simple keyword extraction: take nouns/adjectives or just the first few meaningful words
+    const keywords = textToProcess
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3 && !['this', 'that', 'with', 'from', 'what', 'your', 'about'].includes(word))
+      .slice(0, 5)
+      .join(' ');
+
+    const prompt = `Eco-friendly Pokhara ${keywords || 'nature conservation'}`;
+    
+    const botMsgId = Date.now().toString();
+    const imageMsg: Message = {
+      id: botMsgId,
+      role: 'bot',
+      text: `Generating a visual for: "${prompt}"...`,
+      timestamp: new Date(),
+      imagePrompt: prompt
+    };
+
+    setMessages(prev => [...prev, imageMsg]);
+    setLoading(false);
+    toast.success('Visual generated!');
+  };
+
   const handleSend = async (e?: React.FormEvent, overrideInput?: string) => {
     e?.preventDefault();
     const textToSend = overrideInput || input;
@@ -256,7 +291,9 @@ export default function ChatPage() {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    // User requested to clear conversation history array on each new question to fix repetition
+    const currentMessages = [userMsg]; 
+    setMessages(currentMessages);
     setInput('');
     setLoading(true);
 
@@ -275,7 +312,7 @@ export default function ChatPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          messages: messages.concat(userMsg).slice(-5).map(m => ({ role: m.role, text: m.text })),
+          messages: currentMessages.map(m => ({ role: m.role, text: m.text })),
           aqi 
         }),
       });
@@ -489,6 +526,15 @@ export default function ChatPage() {
                 <Mic size={20} />
               </button>
             </div>
+            <Button
+              type="button"
+              onClick={generateVisual}
+              disabled={loading}
+              className="bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-2xl h-14 px-4 border border-emerald-500/20 shadow-lg active:scale-95 transition-all shrink-0 font-bold text-xs flex flex-col items-center justify-center gap-1"
+            >
+              <ImagePlus size={18} />
+              <span>Visual</span>
+            </Button>
             <Button
               type="submit"
               disabled={loading || (!input.trim() && !isListening)}

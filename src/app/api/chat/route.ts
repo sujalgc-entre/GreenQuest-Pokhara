@@ -12,17 +12,13 @@ export async function POST(req: Request) {
     const sdk = new Bytez(apiKey);
     const model = sdk.model("Qwen/Qwen3-0.6B");
 
-    const systemPrompt = `You are an eco-friendly AI assistant for Pokhara, Nepal.
-IMPORTANT: You MUST follow this structure for every response:
+    const systemPrompt = `You are an eco-friendly AI assistant for Pokhara, Nepal. 
+Current time: ${new Date().toISOString()}.
+IMPORTANT: Provide a unique, specific answer. Never repeat previous answers or patterns. Answer differently than before.
+You MUST follow this structure for every response:
 1. Start with your reasoning process wrapped in <think> tags.
 2. Then provide your final conversational answer to the user.
 3. If relevant, end with an image prompt wrapped in <image_prompt> tags.
-
-Example:
-<think>
-The user is asking about AQI in Pokhara. I should explain the current level and give tips.
-</think>
-Namaste! The air quality today is...
 
 Be conversational, warm, and use local context.`;
     
@@ -30,21 +26,32 @@ Be conversational, warm, and use local context.`;
       { role: "system", content: systemPrompt },
       ...messages.map((m: any) => ({
         role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.text || m.content
+        content: m.role === 'user' ? `${m.text || m.content} [${Date.now()}]` : (m.text || m.content)
       }))
     ];
 
     // Add AQI context to the last message
     if (formattedMessages.length > 0) {
       const lastMsg = formattedMessages[formattedMessages.length - 1];
-      lastMsg.content = `Current Pokhara AQI: ${aqi}. ${lastMsg.content}`;
+      if (lastMsg.role === 'user') {
+        lastMsg.content = `Current Pokhara AQI: ${aqi}. ${lastMsg.content}`;
+      }
     }
 
-    const { error, output } = await model.run(formattedMessages);
-
-    if (error) {
-      console.error("Bytez API Error:", error);
-      throw new Error(error.message || "Failed to run model");
+    let output;
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const result = await model.run(formattedMessages);
+        if (result.error) throw new Error(result.error.message);
+        output = result.output;
+        console.log("Full API Response:", JSON.stringify(result, null, 2));
+        break;
+      } catch (e: any) {
+        retries--;
+        if (retries === 0) throw e;
+        await new Promise(r => setTimeout(r, 1000));
+      }
     }
 
     // Since bytez.js model.run returns a full response, we simulate streaming for the frontend typing effect
