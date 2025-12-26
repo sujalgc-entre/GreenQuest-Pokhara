@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Bike, Bus, Trash2, TreePine, Leaf, CheckCircle2 } from 'lucide-react';
+import { Bike, Bus, Trash2, TreePine, Leaf, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/Animations';
 import confetti from 'canvas-confetti';
@@ -19,6 +19,8 @@ const ACTIONS = [
   { id: 'Recycled Paper', label: 'Recycled Paper', icon: Trash2, unit: 'items', co2: 0.05, color: 'text-amber-400' },
   { id: 'Planted Tree', label: 'Planted Tree', icon: TreePine, unit: 'trees', co2: 2, color: 'text-emerald-400' },
 ];
+
+const MAX_QUANTITY = 10000;
 
 export default function LogActionPage() {
   const { user } = useAuth();
@@ -42,17 +44,28 @@ export default function LogActionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !quantity || loading) return;
+    const qty = parseFloat(quantity);
+
+    // Validation
+    if (!user || loading) return;
+    if (isNaN(qty) || qty <= 0) {
+      toast.error('Quantity must be greater than zero');
+      return;
+    }
+    if (qty > MAX_QUANTITY) {
+      toast.error(`Quantity cannot exceed ${MAX_QUANTITY}`);
+      return;
+    }
 
     setLoading(true);
     const action = ACTIONS.find(a => a.id === selectedAction)!;
-    const co2Saved = action.co2 * parseFloat(quantity);
+    const co2Saved = action.co2 * qty;
 
     try {
       const { error } = await supabase.from('actions').insert({
         user_id: user.id,
         action_type: selectedAction,
-        quantity: parseFloat(quantity),
+        quantity: qty,
         co2_saved: co2Saved,
         ward: userWard,
       });
@@ -71,7 +84,8 @@ export default function LogActionPage() {
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setLoading(false);
+      // Small delay to prevent rapid-fire clicks
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
@@ -140,6 +154,15 @@ export default function LogActionPage() {
               />
               <div className="absolute inset-0 bg-teal-500/5 blur-xl rounded-2xl -z-10 group-focus-within:bg-teal-500/10 transition-all" />
             </div>
+            {parseFloat(quantity) > MAX_QUANTITY && (
+              <motion.p 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-xs flex items-center gap-1"
+              >
+                <AlertCircle className="w-3 h-3" /> That's a bit too much for one quest!
+              </motion.p>
+            )}
           </div>
 
           <Button

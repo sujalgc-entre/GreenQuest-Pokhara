@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
-import { Wind, CloudSun, Thermometer, User, LogOut, ArrowUpRight, Leaf } from 'lucide-react';
+import { Wind, CloudSun, Thermometer, User, LogOut, ArrowUpRight, Leaf, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThreeScene } from '@/components/ThreeScene';
 import { Counter, GlassCard } from '@/components/Animations';
@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [aqi, setAqi] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 500], [0, 200]);
@@ -25,8 +26,14 @@ export default function Dashboard() {
 
       try {
         const aqiRes = await fetch('https://api.waqi.info/feed/pokhara/?token=demo');
+        if (!aqiRes.ok) throw new Error('Failed to fetch AQI');
         const aqiData = await aqiRes.json();
-        setAqi(aqiData.data);
+        
+        if (aqiData.status === 'ok') {
+          setAqi(aqiData.data);
+        } else {
+          setAqi({ aqi: 42, iaqi: { t: { v: 22 } } }); // Mock data if API limit reached
+        }
 
         const { data: profile } = await supabase
           .from('profiles')
@@ -34,8 +41,11 @@ export default function Dashboard() {
           .eq('id', user.id)
           .single();
         setUserData(profile);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+      } catch (err: any) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err.message);
+        // Fallback mock data
+        setAqi({ aqi: 42, iaqi: { t: { v: 22 } } });
       } finally {
         setLoading(false);
       }
@@ -62,7 +72,9 @@ export default function Dashboard() {
     return { label: 'Hazardous', color: 'text-red-400', glow: 'shadow-red-500/50' };
   };
 
-  const aqiInfo = getAqiStatus(aqi?.aqi || 0);
+  const aqiValue = aqi?.aqi || 42;
+  const aqiInfo = getAqiStatus(aqiValue);
+  const temperature = aqi?.iaqi?.t?.v || 22;
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center bg-background">
@@ -80,7 +92,6 @@ export default function Dashboard() {
       <ThreeScene />
 
       <main className="flex-1 px-6 pt-12 pb-32 max-w-2xl mx-auto w-full space-y-8">
-        {/* Header */}
         <header className="flex justify-between items-start">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -107,7 +118,17 @@ export default function Dashboard() {
           </motion.div>
         </header>
 
-        {/* AQI Glass Card */}
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex items-center gap-3 text-orange-200 text-sm"
+          >
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+            <span>Real-time AQI unavailable. Showing estimated data for Pokhara.</span>
+          </motion.div>
+        )}
+
         <GlassCard className="relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <Wind className="w-32 h-32 text-white" />
@@ -123,13 +144,13 @@ export default function Dashboard() {
             
             <div className="flex items-end gap-4">
               <h2 className="text-7xl font-black text-white tracking-tighter">
-                <Counter value={aqi?.aqi || 0} decimals={0} />
+                <Counter value={aqiValue} decimals={0} />
               </h2>
               <div className="pb-2">
                 <p className={`text-xl font-bold ${aqiInfo.color} drop-shadow-md`}>{aqiInfo.label}</p>
                 <div className="flex items-center gap-2 text-white/60 text-sm font-medium">
                   <Thermometer className="w-4 h-4" />
-                  <span>{aqi?.iaqi?.t?.v}°C</span>
+                  <span>{temperature}°C</span>
                 </div>
               </div>
             </div>
@@ -153,7 +174,6 @@ export default function Dashboard() {
           </div>
         </GlassCard>
 
-        {/* Impact Counter Card */}
         <GlassCard className="border-teal-500/20">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -201,20 +221,29 @@ export default function Dashboard() {
           </div>
         </GlassCard>
 
-        {/* Action Button Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="grid grid-cols-2 gap-4"
         >
-          <Button className="h-20 glass-dark border-teal-500/30 text-teal-400 hover:bg-teal-500/10 rounded-2xl font-bold flex flex-col gap-1 neumorph border-0 shadow-none">
-            <PlusSquare className="w-6 h-6" />
-            <span>Log Action</span>
+          <Button 
+            asChild
+            className="h-24 glass-dark border-teal-500/30 text-teal-400 hover:bg-teal-500/10 rounded-2xl font-bold flex flex-col gap-1 neumorph border-0 shadow-none cursor-pointer"
+          >
+            <a href="/log">
+              <PlusSquare className="w-6 h-6" />
+              <span>Log Action</span>
+            </a>
           </Button>
-          <Button className="h-20 glass-dark border-zinc-500/30 text-zinc-300 hover:bg-white/5 rounded-2xl font-bold flex flex-col gap-1 neumorph border-0 shadow-none">
-            <Trophy className="w-6 h-6" />
-            <span>Leaderboard</span>
+          <Button 
+            asChild
+            className="h-24 glass-dark border-zinc-500/30 text-zinc-300 hover:bg-white/5 rounded-2xl font-bold flex flex-col gap-1 neumorph border-0 shadow-none cursor-pointer"
+          >
+            <a href="/leaderboard">
+              <Trophy className="w-6 h-6" />
+              <span>Leaderboard</span>
+            </a>
           </Button>
         </motion.div>
       </main>
