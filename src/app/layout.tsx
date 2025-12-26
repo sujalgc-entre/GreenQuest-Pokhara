@@ -5,6 +5,7 @@ import { VisualEditsMessenger } from "orchids-visual-edits";
 import { AuthProvider } from "@/components/AuthProvider";
 import { BottomNav } from "@/components/BottomNav";
 import { Toaster } from "sonner";
+import { PageWrapper } from "@/components/Animations";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,14 +28,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-50 pb-20`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground pb-24`}
       >
+        <div className="mesh-gradient" />
         <AuthProvider>
-          {children}
+          <PageWrapper>
+            {children}
+          </PageWrapper>
           <BottomNav />
-          <Toaster position="top-center" />
+          <Toaster position="top-center" richColors />
         </AuthProvider>
         <VisualEditsMessenger />
       </body>

@@ -44,72 +44,27 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --radius: 1rem;
+  --background: oklch(0.15 0.02 180);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.2 0.04 180 / 0.5);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.2 0.04 180);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.6 0.2 160);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.3 0.05 180);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.25 0.03 180);
+  --muted-foreground: oklch(0.7 0.02 180);
+  --accent: oklch(0.6 0.2 180);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.57 0.24 27);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --ring: oklch(0.6 0.2 160);
+  --chart-1: oklch(0.64 0.22 41);
+  --chart-2: oklch(0.6 0.12 184);
 }
 
 @layer base {
@@ -117,8 +72,73 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
+    background: radial-gradient(circle at 50% 0%, #0f766e 0%, #14b8a6 50%, #0f172a 100%);
+    background-attachment: fixed;
   }
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply backdrop-blur-xl bg-black/20 border border-white/10 shadow-2xl;
+  }
+
+  .neumorph {
+    @apply bg-teal-900/50 shadow-[5px_5px_10px_#0a4d48,-5px_-5px_10px_#149f94];
+    transition: all 0.3s ease;
+  }
+
+  .neumorph:hover {
+    @apply shadow-[inset_5px_5px_10px_#0a4d48,inset_-5px_-5px_10px_#149f94];
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(20, 184, 166, 0.5), 0 0 20px rgba(20, 184, 166, 0.3);
+  }
+
+  .mesh-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: #0f172a;
+    background-image: 
+      radial-gradient(at 0% 0%, #0f766e 0, transparent 50%), 
+      radial-gradient(at 50% 0%, #14b8a6 0, transparent 50%), 
+      radial-gradient(at 100% 0%, #0f766e 0, transparent 50%);
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: mesh-move 20s infinite alternate;
+  }
+}
+
+@keyframes mesh-move {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.1) translate(2%, 2%); }
+  100% { transform: scale(1) translate(-2%, -2%); }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(20, 184, 166, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 184, 166, 0.5);
 }
 
 /* Hide Next.js error overlay portal */
