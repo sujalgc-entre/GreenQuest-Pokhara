@@ -74,15 +74,15 @@ export default function LeaderboardPage() {
       </header>
 
       {/* Top 3 Podium (Visual) */}
-      <div className="flex items-end justify-center gap-4 h-48 mb-8">
+      <div className="flex items-end justify-center gap-4 h-64 mb-16">
         <AnimatePresence>
             {topWards[1] && (
               <motion.div
                 initial={{ height: 0 }}
-                animate={{ height: '70%' }}
+                animate={{ height: '65%' }}
                 className="flex-1 solid-card bg-slate-800 rounded-t-3xl border-teal-500/20 flex flex-col items-center justify-end p-4 relative shadow-2xl"
               >
-                <div className="absolute -top-12 flex flex-col items-center">
+                <div className="absolute -top-16 flex flex-col items-center">
                   <div className="p-3 glass rounded-full bg-slate-300/30 text-white shadow-lg">
                     <Medal className="w-8 h-8" />
                   </div>
@@ -94,10 +94,10 @@ export default function LeaderboardPage() {
             {topWards[0] && (
               <motion.div
                 initial={{ height: 0 }}
-                animate={{ height: '90%' }}
+                animate={{ height: '85%' }}
                 className="flex-1 solid-card bg-teal-900/40 border-teal-400 shadow-[0_0_40px_rgba(20,184,166,0.3)] rounded-t-3xl flex flex-col items-center justify-end p-4 relative"
               >
-                <div className="absolute -top-16 flex flex-col items-center">
+                <div className="absolute -top-20 flex flex-col items-center">
                   <div className="p-4 glass rounded-full bg-yellow-400/30 text-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.4)] border-yellow-400/50">
                     <Trophy className="w-10 h-10" />
                   </div>
@@ -109,10 +109,10 @@ export default function LeaderboardPage() {
             {topWards[2] && (
               <motion.div
                 initial={{ height: 0 }}
-                animate={{ height: '55%' }}
+                animate={{ height: '50%' }}
                 className="flex-1 solid-card bg-slate-800 rounded-t-3xl border-teal-500/20 flex flex-col items-center justify-end p-4 relative shadow-2xl"
               >
-                <div className="absolute -top-12 flex flex-col items-center">
+                <div className="absolute -top-16 flex flex-col items-center">
                   <div className="p-3 glass rounded-full bg-orange-400/30 text-white shadow-lg">
                     <Medal className="w-8 h-8" />
                   </div>
